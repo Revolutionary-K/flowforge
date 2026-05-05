@@ -1,36 +1,126 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FlowForge - BPMN 2.0 Flow Editor
 
-## Getting Started
+A modern, high-performance BPMN 2.0 flow editor built with Next.js, React, and a self-built graphics engine inspired by React Flow.
 
-First, run the development server:
+## Tech Stack
 
+- **Frontend**: Next.js 14, React 18, Zustand, Tailwind CSS, shadcn/ui
+- **Graphics Engine**: Self-built (SVG rendering + batch updates + virtualization)
+- **Backend**: Go (Gin/Echo), MongoDB
+- **Deployment**: Docker + Docker Compose
+
+## Quick Start
+
+### Prerequisites
+
+- Node.js 18+
+- Go 1.21+ (for backend)
+- MongoDB 7+ (for backend)
+
+### Development
+
+1. Clone the project
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/your-org/flowforge.git
+cd flowforge
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install frontend dependencies
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Start frontend development server
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. (Optional) Start backend server
+```bash
+cd backend
+go mod tidy
+go run cmd/server/main.go
+```
 
-## Learn More
+### Docker Deployment
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+docker-compose up -d
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+flowforge/
+├── src/                    # Frontend source
+│   ├── app/                # Next.js App Router
+│   ├── components/         # React components
+│   │   ├── bpmn/           # BPMN editor components
+│   │   ├── flow/           # Flow engine components
+│   │   └── ui/             # shadcn/ui components
+│   ├── lib/                # Core libraries
+│   │   ├── flow/           # Graphics engine
+│   │   ├── bpmn/           # BPMN semantic layer
+│   │   ├── store/          # Zustand state management
+│   │   └── api/            # API client
+│   ├── hooks/              # Custom hooks
+│   └── types/              # TypeScript types
+├── backend/                # Go backend service
+│   ├── cmd/                # Command entry
+│   ├── internal/           # Internal packages
+│   └── Dockerfile          # Backend Docker config
+├── docs/                   # Documentation
+│   ├── superpowers/        # Design docs
+│   └── plans/              # Implementation plans
+├── docker-compose.yml      # Docker Compose config
+└── Dockerfile              # Frontend Docker config
+```
 
-## Deploy on Vercel
+## Core Features
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- ✅ Complete BPMN 2.0 element support
+- ✅ Large flow optimization (200-1000 nodes)
+- ✅ Undo/redo history
+- ✅ Drag and drop interaction
+- ✅ Zoom and pan
+- ✅ Property editing panel
+- ✅ BPMN XML import/export
+- 🚧 Real-time collaboration (planned)
+- 🚧 Version management (planned)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Performance Optimizations
+
+- **Virtualized rendering**: Only render nodes in viewport
+- **Batch updates**: Batch DOM updates to reduce re-renders
+- **React.memo**: Prevent unnecessary component updates
+- **Zustand shallow comparison**: Optimize state selection
+
+## API Endpoints
+
+### Processes
+
+- `GET /api/v1/processes` - List processes
+- `POST /api/v1/processes` - Create process
+- `GET /api/v1/processes/:id` - Get process
+- `PUT /api/v1/processes/:id` - Update process
+- `DELETE /api/v1/processes/:id` - Delete process
+
+### Health Check
+
+- `GET /health` - Server health check
+
+## Environment Variables
+
+```bash
+# Frontend
+NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1
+
+# Backend
+MONGODB_URI=mongodb://localhost:27017
+MONGODB_DATABASE=flowforge
+JWT_SECRET=your-secret-key
+```
+
+## License
+
+MIT
