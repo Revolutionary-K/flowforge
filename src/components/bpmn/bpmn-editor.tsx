@@ -6,7 +6,8 @@ import { BpmnToolbar } from './bpmn-toolbar';
 import { BpmnPalette } from './bpmn-palette';
 import { BpmnProperties } from './bpmn-properties';
 import { useFlowStore } from '@/lib/store';
-import { parseBpmnXml, serializeToBpmnXml } from '@/lib/bpmn/parser';
+import { parseBpmnXml } from '@/lib/bpmn/parser';
+import { serializeToBpmnXml } from '@/lib/bpmn/serializer';
 import { NodeProps } from '@/types/flow';
 
 const bpmnNodeTypes: Record<string, React.ComponentType<NodeProps>> = {

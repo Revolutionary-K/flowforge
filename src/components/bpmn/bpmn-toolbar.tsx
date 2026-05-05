@@ -49,7 +49,7 @@ export function BpmnToolbar({ readOnly, onSave, onExport }: BpmnToolbarProps) {
           </Button>
           
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger>
               <Button variant="ghost" size="icon" title="Export">
                 <Download className="h-4 w-4" />
               </Button>

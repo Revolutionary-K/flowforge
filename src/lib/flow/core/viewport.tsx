@@ -66,31 +66,26 @@ export function Viewport({
     [viewport, deselectAll]
   );
 
-  const handleMouseMove = useCallback(
-    (event: React.MouseEvent) => {
-      if (isPanning) {
-        const newX = event.clientX - panStart.x;
-        const newY = event.clientY - panStart.y;
-        setViewport({ ...viewport, x: newX, y: newY });
-      }
-    },
-    [isPanning, panStart, viewport, setViewport]
-  );
-
-  const handleMouseUp = useCallback(() => {
-    setIsPanning(false);
-  }, []);
-
   useEffect(() => {
-    if (isPanning) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-      return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
-      };
-    }
-  }, [isPanning, handleMouseMove, handleMouseUp]);
+    if (!isPanning) return;
+
+    const handleMouseMove = (event: MouseEvent) => {
+      const newX = event.clientX - panStart.x;
+      const newY = event.clientY - panStart.y;
+      setViewport({ ...viewport, x: newX, y: newY });
+    };
+
+    const handleMouseUp = () => {
+      setIsPanning(false);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isPanning, panStart, viewport, setViewport]);
 
   return (
     <div

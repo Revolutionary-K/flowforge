@@ -3,7 +3,7 @@
 import React, { memo } from 'react';
 import { FlowHandle, HandlePosition, HandleType } from '@/types/flow';
 
-export { HandlePosition, HandleType };
+export type { HandlePosition, HandleType };
 
 interface HandleProps extends FlowHandle {
   className?: string;
