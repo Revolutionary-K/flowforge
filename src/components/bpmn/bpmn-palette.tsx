@@ -5,6 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useFlowStore } from '@/lib/store';
 import { NodeType, FlowNode } from '@/types/flow';
+import { logger } from '@/lib/logger';
 
 const bpmnElements = [
   {
@@ -82,13 +83,16 @@ function PaletteItem({ type, label, icon }: PaletteItemProps) {
   
   const handleDragStart = useCallback(
     (event: React.DragEvent) => {
+      logger.debug('[Palette] Drag started', { type, label });
       event.dataTransfer.setData('application/bpmn-type', type);
       event.dataTransfer.effectAllowed = 'copy';
     },
-    [type]
+    [type, label]
   );
   
   const handleClick = useCallback(() => {
+    logger.info('[Palette] Item clicked', { type, label });
+    
     const newNode: FlowNode = {
       id: `${type}_${Date.now()}`,
       type,
@@ -99,8 +103,10 @@ function PaletteItem({ type, label, icon }: PaletteItemProps) {
       dragging: false,
     };
     
+    logger.debug('[Palette] Creating node', { id: newNode.id, type, position: newNode.position });
     addNode(newNode);
     pushHistory();
+    logger.info('[Palette] Node added successfully', { id: newNode.id });
   }, [type, label, addNode, pushHistory]);
 
   return (

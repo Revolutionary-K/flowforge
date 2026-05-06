@@ -10,6 +10,7 @@ import {
   FlowSnapshot,
   Position,
 } from '@/types/flow';
+import { logger } from '@/lib/logger';
 
 const MAX_HISTORY = 50;
 
@@ -152,8 +153,10 @@ export const useFlowStore = create<FlowStore>()(
       },
 
       addNode: (node: FlowNode) => {
+        logger.info('[Store] addNode called', { id: node.id, type: node.type, position: node.position });
         set((state) => {
           state.nodes.push(node);
+          logger.debug('[Store] Node added to state', { totalNodes: state.nodes.length });
         });
       },
 
@@ -167,10 +170,12 @@ export const useFlowStore = create<FlowStore>()(
       },
 
       deleteNode: (id: string) => {
+        logger.info('[Store] deleteNode called', { id });
         set((state) => {
           state.nodes = state.nodes.filter(n => n.id !== id);
           state.edges = state.edges.filter(e => e.source !== id && e.target !== id);
           state.selectedNodes = state.selectedNodes.filter(nId => nId !== id);
+          logger.debug('[Store] Node deleted', { remainingNodes: state.nodes.length });
         });
       },
 
@@ -197,8 +202,10 @@ export const useFlowStore = create<FlowStore>()(
       },
 
       addEdge: (edge: FlowEdge) => {
+        logger.info('[Store] addEdge called', { id: edge.id, source: edge.source, target: edge.target });
         set((state) => {
           state.edges.push(edge);
+          logger.debug('[Store] Edge added to state', { totalEdges: state.edges.length });
         });
       },
 
@@ -219,6 +226,7 @@ export const useFlowStore = create<FlowStore>()(
       },
 
       selectNode: (id: string, addToSelection = false) => {
+        logger.info('[Store] selectNode called', { id, addToSelection });
         set((state) => {
           if (!addToSelection) {
             for (const node of state.nodes) {
@@ -369,6 +377,7 @@ export const useFlowStore = create<FlowStore>()(
       },
 
       reset: () => {
+        logger.info('[Store] reset called');
         set((state) => {
           state.nodes = [];
           state.edges = [];
@@ -380,6 +389,7 @@ export const useFlowStore = create<FlowStore>()(
       },
 
       loadFromSnapshot: (snapshot: FlowSnapshot) => {
+        logger.info('[Store] loadFromSnapshot called', { nodeCount: snapshot.nodes.length, edgeCount: snapshot.edges.length });
         set((state) => {
           state.nodes = snapshot.nodes;
           state.edges = snapshot.edges;

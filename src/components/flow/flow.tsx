@@ -101,17 +101,27 @@ export function Flow({
   const handleDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'copy';
+    logger.debug('[Flow] Drag over canvas');
   }, []);
 
   const handleDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
+      logger.info('[Flow] Drop event triggered');
       
       const nodeType = event.dataTransfer.getData('application/bpmn-type') as NodeType;
-      if (!nodeType) return;
+      logger.debug('[Flow] Drop data', { nodeType, clientX: event.clientX, clientY: event.clientY });
+      
+      if (!nodeType) {
+        logger.warn('[Flow] No node type in drop data');
+        return;
+      }
 
       const rect = containerRef.current?.getBoundingClientRect();
-      if (!rect) return;
+      if (!rect) {
+        logger.error('[Flow] Container ref not found');
+        return;
+      }
 
       const x = (event.clientX - rect.left - viewport.x) / viewport.zoom;
       const y = (event.clientY - rect.top - viewport.y) / viewport.zoom;
@@ -128,9 +138,10 @@ export function Flow({
         dragging: false,
       };
 
+      logger.info('[Flow] Adding node via drop', { id: newNode.id, type: nodeType, position: newNode.position });
       addNode(newNode);
       pushHistory();
-      logger.debug('Added node via drag', { id: newNode.id, type: nodeType });
+      logger.info('[Flow] Node added successfully', { id: newNode.id });
     },
     [addNode, pushHistory, viewport]
   );

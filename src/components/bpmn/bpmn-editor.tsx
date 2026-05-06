@@ -86,18 +86,32 @@ export function BpmnEditor({
   const { loadFromSnapshot, nodes, edges } = useFlowStore();
 
   useEffect(() => {
+    logger.info('[BpmnEditor] Component mounted', { processId, readOnly, hasInitialXml: !!initialXml });
+    logger.debug('[BpmnEditor] Registered nodeTypes', { types: Object.keys(bpmnNodeTypes) });
+  }, []);
+
+  useEffect(() => {
+    logger.debug('[BpmnEditor] Nodes changed', { count: nodes.length });
+  }, [nodes.length]);
+
+  useEffect(() => {
+    logger.debug('[BpmnEditor] Edges changed', { count: edges.length });
+  }, [edges.length]);
+
+  useEffect(() => {
     if (initialXml) {
-      logger.debug('Loading initial BPMN XML');
+      logger.info('[BpmnEditor] Loading initial BPMN XML');
       try {
         const { nodes, edges } = parseBpmnXml(initialXml);
+        logger.debug('[BpmnEditor] Parsed BPMN XML', { nodeCount: nodes.length, edgeCount: edges.length });
         loadFromSnapshot({
           nodes,
           edges,
           viewport: { x: 0, y: 0, zoom: 1 },
         });
-        logger.info('BPMN XML loaded successfully', { nodeCount: nodes.length, edgeCount: edges.length });
+        logger.info('[BpmnEditor] BPMN XML loaded successfully', { nodeCount: nodes.length, edgeCount: edges.length });
       } catch (error) {
-        logger.error('Failed to parse BPMN XML', error);
+        logger.error('[BpmnEditor] Failed to parse BPMN XML', error);
       }
     }
   }, [initialXml, loadFromSnapshot]);

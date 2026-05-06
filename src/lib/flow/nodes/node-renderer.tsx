@@ -4,6 +4,7 @@ import React, { memo } from 'react';
 import { FlowNode, NodeProps } from '@/types/flow';
 import { useFlowStore } from '@/lib/store';
 import { Handle } from './handle';
+import { logger } from '@/lib/logger';
 
 const DefaultNode = memo(({ id, data, selected, handles }: NodeProps) => {
   return (
@@ -38,12 +39,17 @@ export const NodeWrapper = memo(({ node, nodeTypes }: NodeWrapperProps) => {
   const [nodeStart, setNodeStart] = React.useState({ x: 0, y: 0 });
 
   const NodeComponent = nodeTypes[node.type] || DefaultNode;
+  
+  React.useEffect(() => {
+    logger.debug('[NodeWrapper] Rendering node', { id: node.id, type: node.type, position: node.position });
+  }, []);
 
   const handleMouseDown = React.useCallback(
     (event: React.MouseEvent) => {
       if (event.button !== 0) return;
       
       event.stopPropagation();
+      logger.info('[NodeWrapper] Mouse down on node', { id: node.id, type: node.type });
       selectNode(node.id, event.shiftKey);
       
       setIsDragging(true);
@@ -66,6 +72,7 @@ export const NodeWrapper = memo(({ node, nodeTypes }: NodeWrapperProps) => {
     };
 
     const handleMouseUp = () => {
+      logger.info('[NodeWrapper] Drag ended', { id: node.id, position: node.position });
       setIsDragging(false);
       pushHistory();
     };
@@ -111,6 +118,10 @@ interface NodeRendererProps {
 
 export function NodeRenderer({ nodeTypes }: NodeRendererProps) {
   const nodes = useFlowStore((state) => state.nodes);
+  
+  React.useEffect(() => {
+    logger.debug('[NodeRenderer] Nodes updated', { count: nodes.length });
+  }, [nodes.length]);
   
   return (
     <>
