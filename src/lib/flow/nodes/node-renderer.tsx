@@ -136,10 +136,10 @@ export function NodeRenderer({ nodeTypes }: NodeRendererProps) {
   }, [nodes, nodeTypes]);
   
   return (
-    <div data-testid="node-renderer" style={{ position: 'relative', width: '100%', height: '100%' }}>
+    <>
       {nodes.map((node) => (
         <NodeWrapper key={node.id} node={node} nodeTypes={nodeTypes} />
       ))}
-    </div>
+    </>
   );
 }
