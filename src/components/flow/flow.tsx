@@ -107,10 +107,17 @@ export function Flow({
   const handleDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
+      event.stopPropagation();
       logger.info('[Flow] Drop event triggered');
       
       const nodeType = event.dataTransfer.getData('application/bpmn-type') as NodeType;
-      logger.debug('[Flow] Drop data', { nodeType, clientX: event.clientX, clientY: event.clientY });
+      logger.debug('[Flow] Drop data', { 
+        nodeType, 
+        clientX: event.clientX, 
+        clientY: event.clientY,
+        viewport,
+        containerRect: containerRef.current?.getBoundingClientRect()
+      });
       
       if (!nodeType) {
         logger.warn('[Flow] No node type in drop data');
@@ -138,7 +145,14 @@ export function Flow({
         dragging: false,
       };
 
-      logger.info('[Flow] Adding node via drop', { id: newNode.id, type: nodeType, position: newNode.position });
+      logger.info('[Flow] Adding node via drop', { 
+        id: newNode.id, 
+        type: nodeType, 
+        position: newNode.position,
+        size: newNode.size,
+        calculatedX: x,
+        calculatedY: y
+      });
       addNode(newNode);
       pushHistory();
       logger.info('[Flow] Node added successfully', { id: newNode.id });

@@ -41,7 +41,14 @@ export const NodeWrapper = memo(({ node, nodeTypes }: NodeWrapperProps) => {
   const NodeComponent = nodeTypes[node.type] || DefaultNode;
   
   React.useEffect(() => {
-    logger.debug('[NodeWrapper] Rendering node', { id: node.id, type: node.type, position: node.position });
+    logger.debug('[NodeWrapper] Component mounted', { 
+      id: node.id, 
+      type: node.type, 
+      position: node.position,
+      size: node.size,
+      hasComponent: !!nodeTypes[node.type],
+      componentType: NodeComponent.displayName || NodeComponent.name || 'Unknown'
+    });
   }, []);
 
   const handleMouseDown = React.useCallback(
@@ -121,13 +128,18 @@ export function NodeRenderer({ nodeTypes }: NodeRendererProps) {
   
   React.useEffect(() => {
     logger.debug('[NodeRenderer] Nodes updated', { count: nodes.length });
-  }, [nodes.length]);
+    if (nodes.length > 0) {
+      logger.debug('[NodeRenderer] First node', { id: nodes[0].id, type: nodes[0].type, position: nodes[0].position });
+      logger.debug('[NodeRenderer] Available nodeTypes', { types: Object.keys(nodeTypes) });
+      logger.debug('[NodeRenderer] Type match', { hasType: !!nodeTypes[nodes[0].type] });
+    }
+  }, [nodes, nodeTypes]);
   
   return (
-    <>
+    <div data-testid="node-renderer" style={{ position: 'relative', width: '100%', height: '100%' }}>
       {nodes.map((node) => (
         <NodeWrapper key={node.id} node={node} nodeTypes={nodeTypes} />
       ))}
-    </>
+    </div>
   );
 }
