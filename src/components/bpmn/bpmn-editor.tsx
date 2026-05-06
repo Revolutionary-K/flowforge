@@ -10,62 +10,22 @@ import { parseBpmnXml } from '@/lib/bpmn/parser';
 import { serializeToBpmnXml } from '@/lib/bpmn/serializer';
 import { NodeProps } from '@/types/flow';
 import { logger } from '@/lib/logger';
+import {
+  StartEventNode,
+  EndEventNode,
+  UserTaskNode,
+  ServiceTaskNode,
+  ExclusiveGatewayNode,
+  ParallelGatewayNode,
+} from './nodes/BpmnNodes';
 
 const bpmnNodeTypes: Record<string, React.ComponentType<NodeProps>> = {
-  startEvent: ({ data, selected }: NodeProps) => (
-    <div className={`
-      w-10 h-10 rounded-full border-2 flex items-center justify-center
-      ${selected ? 'border-blue-500 bg-blue-50' : 'border-gray-400 bg-white'}
-    `}>
-      <span className="text-xs">▶</span>
-    </div>
-  ),
-  endEvent: ({ data, selected }: NodeProps) => (
-    <div className={`
-      w-10 h-10 rounded-full border-4 flex items-center justify-center
-      ${selected ? 'border-blue-500 bg-blue-50' : 'border-gray-600 bg-white'}
-    `}>
-      <span className="text-xs">⏹</span>
-    </div>
-  ),
-  userTask: ({ data, selected }: NodeProps) => (
-    <div className={`
-      w-32 h-20 rounded-md border-2 flex flex-col items-center justify-center
-      ${selected ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white'}
-    `}>
-      <span className="text-lg mb-1">👤</span>
-      <span className="text-xs text-center truncate w-full px-1">
-        {data.name || 'User Task'}
-      </span>
-    </div>
-  ),
-  serviceTask: ({ data, selected }: NodeProps) => (
-    <div className={`
-      w-32 h-20 rounded-md border-2 flex flex-col items-center justify-center
-      ${selected ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white'}
-    `}>
-      <span className="text-lg mb-1">⚙️</span>
-      <span className="text-xs text-center truncate w-full px-1">
-        {data.name || 'Service Task'}
-      </span>
-    </div>
-  ),
-  exclusiveGateway: ({ data, selected }: NodeProps) => (
-    <div className={`
-      w-12 h-12 border-2 rotate-45 flex items-center justify-center
-      ${selected ? 'border-blue-500 bg-blue-50' : 'border-gray-400 bg-white'}
-    `}>
-      <span className="-rotate-45 text-lg font-bold">✕</span>
-    </div>
-  ),
-  parallelGateway: ({ data, selected }: NodeProps) => (
-    <div className={`
-      w-12 h-12 border-2 rotate-45 flex items-center justify-center
-      ${selected ? 'border-blue-500 bg-blue-50' : 'border-gray-400 bg-white'}
-    `}>
-      <span className="-rotate-45 text-lg font-bold">+</span>
-    </div>
-  ),
+  startEvent: StartEventNode,
+  endEvent: EndEventNode,
+  userTask: UserTaskNode,
+  serviceTask: ServiceTaskNode,
+  exclusiveGateway: ExclusiveGatewayNode,
+  parallelGateway: ParallelGatewayNode,
 };
 
 interface BpmnEditorProps {
@@ -84,10 +44,12 @@ export function BpmnEditor({
   onExport,
 }: BpmnEditorProps) {
   const { loadFromSnapshot, nodes, edges } = useFlowStore();
+  const [isMounted, setIsMounted] = React.useState(false);
 
   useEffect(() => {
     logger.info('[BpmnEditor] Component mounted', { processId, readOnly, hasInitialXml: !!initialXml });
     logger.debug('[BpmnEditor] Registered nodeTypes', { types: Object.keys(bpmnNodeTypes) });
+    setIsMounted(true);
   }, []);
 
   useEffect(() => {
@@ -157,10 +119,14 @@ export function BpmnEditor({
         {!readOnly && <BpmnPalette />}
         
         <div className="flex-1">
-          <Flow
-            nodeTypes={bpmnNodeTypes}
-            className="w-full h-full"
-          />
+          {isMounted ? (
+            <Flow
+              nodeTypes={bpmnNodeTypes}
+              className="w-full h-full"
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-50" />
+          )}
         </div>
         
         <BpmnProperties readOnly={readOnly} />
