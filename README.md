@@ -4,17 +4,18 @@ A modern, high-performance BPMN 2.0 flow editor built with Next.js, React, and a
 
 ## Tech Stack
 
-- **Frontend**: Next.js 14, React 18, Zustand, Tailwind CSS, shadcn/ui
+- **Frontend**: Next.js 16.2.4, React 19.2.5, TypeScript 5, Zustand 5, Tailwind CSS 4, shadcn/ui
 - **Graphics Engine**: Self-built (SVG rendering + batch updates + virtualization)
-- **Backend**: Go (Gin/Echo), MongoDB
+- **Backend**: Go 1.22 (Gin), MongoDB 7, zerolog
+- **Testing**: Vitest + Testing Library (frontend), Go testing (backend)
 - **Deployment**: Docker + Docker Compose
 
 ## Quick Start
 
 ### Prerequisites
 
-- Node.js 18+
-- Go 1.21+ (for backend)
+- Node.js 20+
+- Go 1.22+ (for backend)
 - MongoDB 7+ (for backend)
 
 ### Development
@@ -52,29 +53,80 @@ docker-compose up -d
 
 ```
 flowforge/
-├── src/                    # Frontend source
-│   ├── app/                # Next.js App Router
-│   ├── components/         # React components
-│   │   ├── bpmn/           # BPMN editor components
-│   │   ├── flow/           # Flow engine components
-│   │   └── ui/             # shadcn/ui components
-│   ├── lib/                # Core libraries
-│   │   ├── flow/           # Graphics engine
-│   │   ├── bpmn/           # BPMN semantic layer
-│   │   ├── store/          # Zustand state management
-│   │   └── api/            # API client
-│   ├── hooks/              # Custom hooks
-│   └── types/              # TypeScript types
-├── backend/                # Go backend service
-│   ├── cmd/                # Command entry
-│   ├── internal/           # Internal packages
-│   └── Dockerfile          # Backend Docker config
-├── docs/                   # Documentation
-│   ├── superpowers/        # Design docs
-│   └── plans/              # Implementation plans
-├── docker-compose.yml      # Docker Compose config
-└── Dockerfile              # Frontend Docker config
+├── src/                          # Frontend source
+│   ├── app/                      # Next.js App Router
+│   ├── components/               # React components
+│   │   ├── bpmn/                 # BPMN editor components
+│   │   ├── flow/                 # Flow engine components
+│   │   └── ui/                   # shadcn/ui components
+│   ├── lib/                      # Core libraries
+│   │   ├── flow/                 # Graphics engine
+│   │   ├── bpmn/                 # BPMN parser/serializer
+│   │   ├── store/                # Zustand state management
+│   │   ├── api/                  # API client
+│   │   └── logger.ts             # Frontend logger
+│   ├── hooks/                    # Custom hooks
+│   ├── types/                    # TypeScript types
+│   └── __tests__/                # Frontend tests
+├── backend/                      # Go backend service
+│   ├── cmd/                      # Command entry
+│   ├── internal/                 # Internal packages
+│   │   ├── config/               # Configuration
+│   │   ├── handler/              # HTTP handlers
+│   │   ├── logger/               # Backend logger (zerolog)
+│   │   └── domain/               # Domain models
+│   └── Dockerfile                # Backend Docker config
+├── docker-compose.yml            # Docker Compose config
+└── Dockerfile                    # Frontend Docker config
 ```
+
+## Developer Commands
+
+```bash
+# Frontend (from project root)
+npm run dev              # Start dev server (http://localhost:3000)
+npm run build            # Production build
+npm run start            # Start production server
+npm run lint             # ESLint
+npm run test             # Run tests (watch mode)
+npm run test:run         # Run tests (single run)
+npm run test:coverage    # Run tests with coverage report
+
+# Backend (from backend/)
+go mod tidy              # Install dependencies
+go run cmd/server/main.go  # Start backend server (port 8080)
+go test ./...            # Run all tests
+go test ./... -coverprofile=coverage.out  # Run tests with coverage
+go tool cover -html=coverage.out  # View HTML coverage report
+
+# Docker (full stack)
+docker-compose up -d     # Frontend + API + MongoDB
+```
+
+## Testing
+
+### Frontend Testing
+
+- **Framework**: Vitest + Testing Library
+- **Coverage**: `npm run test:coverage`
+- **Test files**: `src/__tests__/`
+
+Current coverage:
+- Statements: 27.75%
+- Branches: 16.11%
+- Functions: 25%
+- Lines: 28.78%
+
+### Backend Testing
+
+- **Framework**: Go testing
+- **Coverage**: `go test ./... -coverprofile=coverage.out`
+- **Test files**: `*_test.go` in each package
+
+Current coverage:
+- config: 100%
+- logger: 94.4%
+- handler: 41.7%
 
 ## Core Features
 
@@ -85,6 +137,8 @@ flowforge/
 - ✅ Zoom and pan
 - ✅ Property editing panel
 - ✅ BPMN XML import/export
+- ✅ Structured logging (zerolog backend, custom frontend logger)
+- ✅ Unit testing with coverage reports
 - 🚧 Real-time collaboration (planned)
 - 🚧 Version management (planned)
 
@@ -99,7 +153,7 @@ flowforge/
 
 ### Processes
 
-- `GET /api/v1/processes` - List processes
+- `GET /api/v1/processes` - List processes (with pagination, filtering, search)
 - `POST /api/v1/processes` - Create process
 - `GET /api/v1/processes/:id` - Get process
 - `PUT /api/v1/processes/:id` - Update process
@@ -116,9 +170,34 @@ flowforge/
 NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1
 
 # Backend
+PORT=8080
 MONGODB_URI=mongodb://localhost:27017
 MONGODB_DATABASE=flowforge
-JWT_SECRET=your-secret-key
+JWT_SECRET=your-secret-key-change-in-production
+LOG_LEVEL=info  # debug|info|warn|error|fatal|panic
+```
+
+## Logging
+
+### Frontend Logger
+
+```typescript
+import { logger } from '@/lib/logger';
+
+logger.debug('Debug message', { data });
+logger.info('Info message');
+logger.warn('Warning message');
+logger.error('Error message', error);
+```
+
+### Backend Logger (zerolog)
+
+```go
+import "github.com/flowforge/backend/internal/logger"
+
+logger.Init("debug")  // Set log level
+logger.Info().Str("key", "value").Msg("message")
+logger.Error().Err(err).Msg("error occurred")
 ```
 
 ## License

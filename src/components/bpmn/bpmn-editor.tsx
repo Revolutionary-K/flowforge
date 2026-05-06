@@ -9,6 +9,7 @@ import { useFlowStore } from '@/lib/store';
 import { parseBpmnXml } from '@/lib/bpmn/parser';
 import { serializeToBpmnXml } from '@/lib/bpmn/serializer';
 import { NodeProps } from '@/types/flow';
+import { logger } from '@/lib/logger';
 
 const bpmnNodeTypes: Record<string, React.ComponentType<NodeProps>> = {
   startEvent: ({ data, selected }: NodeProps) => (
@@ -86,6 +87,7 @@ export function BpmnEditor({
 
   useEffect(() => {
     if (initialXml) {
+      logger.debug('Loading initial BPMN XML');
       try {
         const { nodes, edges } = parseBpmnXml(initialXml);
         loadFromSnapshot({
@@ -93,21 +95,25 @@ export function BpmnEditor({
           edges,
           viewport: { x: 0, y: 0, zoom: 1 },
         });
+        logger.info('BPMN XML loaded successfully', { nodeCount: nodes.length, edgeCount: edges.length });
       } catch (error) {
-        console.error('Failed to parse BPMN XML:', error);
+        logger.error('Failed to parse BPMN XML', error);
       }
     }
   }, [initialXml, loadFromSnapshot]);
 
   const handleSave = useCallback(() => {
     if (onSave) {
+      logger.debug('Saving BPMN process');
       const xml = serializeToBpmnXml(nodes, edges, processId);
       onSave(xml);
+      logger.info('BPMN process saved');
     }
   }, [nodes, edges, processId, onSave]);
 
   const handleExport = useCallback(
     (format: 'bpmn' | 'svg' | 'png') => {
+      logger.debug(`Exporting as ${format}`);
       if (onExport) {
         onExport(format);
       } else {
@@ -119,6 +125,7 @@ export function BpmnEditor({
         a.download = `process.${format}`;
         a.click();
         URL.revokeObjectURL(url);
+        logger.info(`Exported as ${format}`);
       }
     },
     [nodes, edges, processId, onExport]

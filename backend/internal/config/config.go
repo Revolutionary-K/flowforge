@@ -9,6 +9,7 @@ type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
 	JWT      JWTConfig
+	Log      LogConfig
 }
 
 type ServerConfig struct {
@@ -27,6 +28,10 @@ type JWTConfig struct {
 	Expiration time.Duration
 }
 
+type LogConfig struct {
+	Level string
+}
+
 func Load() *Config {
 	return &Config{
 		Server: ServerConfig{
@@ -41,6 +46,9 @@ func Load() *Config {
 		JWT: JWTConfig{
 			Secret:     getEnv("JWT_SECRET", "your-secret-key"),
 			Expiration: 24 * time.Hour,
+		},
+		Log: LogConfig{
+			Level: getEnv("LOG_LEVEL", "info"),
 		},
 	}
 }
